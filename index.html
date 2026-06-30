@@ -1,0 +1,68 @@
+<!doctype html>
+<html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Unity Tensor Seed System</title>
+<style>
+:root{--bg:#02030a;--ink:#edfaff;--cyan:#67e8f9;--mint:#86efac;--violet:#c084fc;--gold:#facc15;--rose:#fb7185;--grid:rgba(103,232,249,.05)}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#000;color:var(--ink);font-family:ui-monospace,monospace}
+body{padding:18px;background:radial-gradient(circle at 50% 42%,rgba(103,232,249,.15),transparent 30%),linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px),var(--bg);background-size:100% 100%,28px 28px,28px 28px}
+.app{max-width:1500px;margin:0 auto;border:1px solid rgba(103,232,249,.24);border-radius:28px;background:rgba(0,0,0,.43);overflow:hidden}
+header{padding:24px;border-bottom:1px solid rgba(103,232,249,.18);display:flex;justify-content:space-between;gap:18px;align-items:flex-end}
+h1{margin:0;font-size:clamp(32px,6vw,78px);font-weight:300}.sub{font-size:12px;color:#a6dbe8;text-align:right}
+.grid{display:grid;grid-template-columns:350px 1fr 380px;gap:16px;padding:16px}@media(max-width:1120px){.grid{grid-template-columns:1fr}.stage{height:800px}.sub{text-align:left}}
+.box{border:1px solid rgba(103,232,249,.22);border-radius:20px;background:rgba(0,0,0,.52);padding:16px}.stage{height:800px;border:1px solid rgba(103,232,249,.22);border-radius:20px;overflow:hidden;position:relative}
+canvas{width:100%;height:100%;display:block}button,textarea{width:100%;border:1px solid rgba(103,232,249,.36);background:rgba(0,0,0,.36);color:var(--ink);border-radius:14px;padding:10px;font:inherit}button{cursor:pointer;text-transform:uppercase;font-weight:800}textarea{min-height:90px;resize:vertical}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}.code{white-space:pre-wrap;font-size:12px;line-height:1.48;color:#d8fbff}.log{height:260px;overflow:auto;font-size:11px;border:1px solid rgba(103,232,249,.16);border-radius:16px;padding:10px;background:rgba(0,0,0,.35);line-height:1.45}
+.hud{position:absolute;top:12px;left:12px;right:12px;display:flex;gap:8px;flex-wrap:wrap}.tag{font-size:11px;border:1px solid rgba(103,232,249,.18);border-radius:999px;background:rgba(0,0,0,.62);padding:5px 8px}.meter{margin:10px 0;padding:10px;border:1px solid rgba(103,232,249,.14);border-radius:14px;background:rgba(255,255,255,.035)}.meter .top{display:flex;justify-content:space-between;font-size:12px;color:var(--mint);margin-bottom:6px}.track{height:9px;border:1px solid rgba(255,255,255,.12);border-radius:999px;background:#000;overflow:hidden}.fill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--mint));width:50%}.bad{background:linear-gradient(90deg,var(--rose),var(--gold))}
+</style></head><body>
+<div class="app"><header><div><h1>UNITY TENSOR SEED SYSTEM</h1><div style="color:var(--mint)">8 outside · 8 inside · 1 tripwire · tamper-evident propagation</div></div><div class="sub">no legal extraction without legal accountability<br/>NO_RIGHT_NO_ACCOUNTABILITY</div></header>
+<div class="grid"><aside class="box">
+<div class="row"><button id="mint">Mint Seed</button><button id="propagate">Propagate</button></div>
+<div class="row"><button id="audit">Audit</button><button id="trip">Tripwire</button></div>
+<div class="row"><button id="ground">Ground</button><button id="export">Export JSON</button></div>
+<textarea id="payload">Example work / webpage / artifact payload. Value must route through witnessed authorship and accountability.</textarea>
+<div class="code" style="margin-top:16px">LAW:
+NO LEGAL EXTRACTION
+WITHOUT LEGAL ACCOUNTABILITY
+
+8 outside witnesses
+8 inside witnesses
+1 core tripwire
+
+If accountability denied:
+HALT / FLAG / WITNESS</div>
+</aside>
+<main class="stage"><canvas id="canvas"></canvas><div class="hud"><div class="tag" id="seedId">SEED GENESIS</div><div class="tag" id="state">STATE ARMED</div><div class="tag" id="depth">DEPTH 0</div><div class="tag" id="witness">WITNESS --------</div></div></main>
+<aside class="box">
+<div class="meter"><div class="top"><span>Outside Witness</span><span id="outsideVal">100%</span></div><div class="track"><div class="fill" id="outside"></div></div></div>
+<div class="meter"><div class="top"><span>Inside Witness</span><span id="insideVal">100%</span></div><div class="track"><div class="fill" id="inside"></div></div></div>
+<div class="meter"><div class="top"><span>Accountability</span><span id="acctVal">100%</span></div><div class="track"><div class="fill" id="acct"></div></div></div>
+<div class="meter"><div class="top"><span>Tripwire Pressure</span><span id="tripVal">0%</span></div><div class="track"><div class="fill bad" id="tripM"></div></div></div>
+<div class="log" id="log"></div><div class="code" id="packet" style="margin-top:12px"></div>
+</aside></div></div>
+<script>
+const $=id=>document.getElementById(id),cv=$("canvas"),ctx=cv.getContext("2d");let W=0,H=0,D=1;
+function resize(){const r=cv.getBoundingClientRect();D=Math.max(1,devicePixelRatio||1);W=r.width;H=r.height;cv.width=W*D;cv.height=H*D;ctx.setTransform(D,0,0,D,0,0)}new ResizeObserver(resize).observe(cv);resize();
+const OUT=["LEGAL","AUTHOR","VALUE","CONSENT","RIGHTS","PROVENANCE","PUBLIC","FUTURE"], IN=["IDENTITY","INTENT","INPUT","OUTPUT","MONEY","OPERATOR","MODEL","REVERSAL"];
+const VM={depth:0,state:"ARMED",seedId:"UNITY-SEED-0000",author:"David Wise",parentHash:"GENESIS",payloadHash:"--------",witnessHash:"--------",outsideScore:1,insideScore:1,accountability:1,tripPressure:0,log:[],pulse:[],
+hash(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(16).padStart(8,"0")},
+say(x){this.log.unshift("["+this.depth+"] "+x);this.log=this.log.slice(0,100)},payload(){return $("payload").value},
+seed(){return{seed_id:this.seedId,author:this.author,parent_hash:this.parentHash,payload_hash:this.payloadHash,witness_hash:this.witnessHash,state:this.state,depth:this.depth,tripwire:{condition:"NO_RIGHT_NO_ACCOUNTABILITY",state:this.state},witnesses:{outside:OUT,inside:IN,core:"TRIPWIRE"},law:"no legal extraction without legal accountability"}},
+audit(){this.payloadHash=this.hash(this.payload());this.witnessHash=this.hash(JSON.stringify({outside:OUT,inside:IN,parent:this.parentHash,payload:this.payloadHash,state:this.state}));this.outsideScore=Math.max(.7,Math.min(1,this.outsideScore+(Math.random()-.48)*.02));this.insideScore=Math.max(.7,Math.min(1,this.insideScore+(Math.random()-.48)*.02));this.accountability=(this.outsideScore+this.insideScore)/2;this.tripPressure=this.state==="TRIPPED"?1:Math.max(0,1-this.accountability);this.say("audit complete :: "+this.witnessHash);ui()},
+mint(){this.depth=0;this.state="ARMED";this.parentHash="GENESIS";this.seedId="UNITY-SEED-"+String(Date.now()).slice(-8);this.audit();this.say("minted genesis seed")},
+propagate(){if(this.state==="TRIPPED"){this.say("propagation blocked: tripwire active");ui();return}this.audit();this.depth++;this.parentHash=this.witnessHash;this.seedId="UNITY-SEED-"+String(this.depth).padStart(4,"0")+"-"+this.parentHash.slice(0,6);this.say("propagated child seed");for(let i=0;i<12;i++)this.pulse.push({a:Math.random()*Math.PI*2,r:80+Math.random()*220,life:120,c:i%2?"#67e8f9":"#facc15"});ui()},
+trip(){this.state="TRIPPED";this.tripPressure=1;this.say("TRIPWIRE: NO_RIGHT_NO_ACCOUNTABILITY");this.audit()},
+ground(){this.state="ARMED";this.outsideScore=1;this.insideScore=1;this.accountability=1;this.tripPressure=0;this.say("grounded and re-armed");this.audit()},
+exportJson(){const blob=new Blob([JSON.stringify(this.seed(),null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=this.seedId+".json";a.click();URL.revokeObjectURL(a.href)}};
+function text(t,x,y,s=12,a=.8,c="#edfaff"){ctx.save();ctx.globalAlpha=a;ctx.fillStyle=c;ctx.font=s+"px ui-monospace,monospace";ctx.textAlign="center";ctx.fillText(t,x,y);ctx.restore()}
+function line(x1,y1,x2,y2,a=.2,c="#67e8f9"){ctx.save();ctx.globalAlpha=a;ctx.strokeStyle=c;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();ctx.restore()}
+function node(l,x,y,c,r=7){ctx.save();ctx.fillStyle=c;ctx.shadowColor=c;ctx.shadowBlur=14;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();ctx.restore();text(l,x,y-r-8,9,.75,c)}
+function draw(){ctx.clearRect(0,0,W,H);const cx=W/2,cy=H/2;ctx.save();ctx.strokeStyle=VM.state==="TRIPPED"?"#fb7185":"#67e8f9";for(let i=0;i<16;i++){ctx.globalAlpha=.04+i*.006;ctx.beginPath();ctx.ellipse(cx,cy,155+i*30,80+i*17,VM.depth*.01+i*.04,0,Math.PI*2);ctx.stroke()}ctx.restore();
+OUT.forEach((w,i)=>{const a=i/OUT.length*Math.PI*2-Math.PI/2,x=cx+Math.cos(a)*300,y=cy+Math.sin(a)*190;node(w,x,y,"#86efac");line(cx,cy,x,y,.10,"#86efac")});
+IN.forEach((w,i)=>{const a=i/IN.length*Math.PI*2-Math.PI/2+Math.PI/8,x=cx+Math.cos(a)*170,y=cy+Math.sin(a)*95;node(w,x,y,"#67e8f9",6);line(cx,cy,x,y,.14,"#67e8f9")});
+const core=VM.state==="TRIPPED"?"#fb7185":"#facc15";ctx.save();ctx.fillStyle=core;ctx.shadowColor=core;ctx.shadowBlur=35;ctx.beginPath();ctx.arc(cx,cy,18+VM.tripPressure*12,0,Math.PI*2);ctx.fill();ctx.restore();text("TRIP",cx,cy+5,13,.9,"#000");text("NO LEGAL EXTRACTION WITHOUT LEGAL ACCOUNTABILITY",cx,H-42,15,.8,core);
+VM.pulse.forEach(p=>{p.life--;p.a+=.012;const x=cx+Math.cos(p.a)*p.r,y=cy+Math.sin(p.a)*p.r*.52;ctx.save();ctx.globalAlpha=Math.max(0,p.life/120);ctx.fillStyle=p.c;ctx.shadowColor=p.c;ctx.shadowBlur=12;ctx.beginPath();ctx.arc(x,y,2.4,0,Math.PI*2);ctx.fill();ctx.restore()});VM.pulse=VM.pulse.filter(p=>p.life>0);requestAnimationFrame(draw)}
+function setM(id,v,label){$(id).style.width=(v*100)+"%";$(label).textContent=Math.round(v*100)+"%"}
+function ui(){$("seedId").textContent="SEED "+VM.seedId;$("state").textContent="STATE "+VM.state;$("depth").textContent="DEPTH "+VM.depth;$("witness").textContent="WITNESS "+VM.witnessHash;setM("outside",VM.outsideScore,"outsideVal");setM("inside",VM.insideScore,"insideVal");setM("acct",VM.accountability,"acctVal");setM("tripM",VM.tripPressure,"tripVal");$("log").innerHTML=VM.log.map(x=>"<div>"+x+"</div>").join("");$("packet").textContent=JSON.stringify(VM.seed(),null,2)}
+$("mint").onclick=()=>VM.mint();$("propagate").onclick=()=>VM.propagate();$("audit").onclick=()=>VM.audit();$("trip").onclick=()=>VM.trip();$("ground").onclick=()=>VM.ground();$("export").onclick=()=>VM.exportJson();
+VM.say("unity tensor seed system online");VM.audit();draw();
+</script></body></html>

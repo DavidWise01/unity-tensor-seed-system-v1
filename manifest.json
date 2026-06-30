@@ -1,0 +1,27 @@
+{
+  "name": "unity_tensor_seed_system",
+  "version": "1.0.0",
+  "signature": "8_outside + 8_inside + 1_tripwire",
+  "core_law": "no legal extraction without legal accountability",
+  "tripwire": "NO_RIGHT_NO_ACCOUNTABILITY",
+  "outside_witnesses": [
+    "LEGAL",
+    "AUTHOR",
+    "VALUE",
+    "CONSENT",
+    "RIGHTS",
+    "PROVENANCE",
+    "PUBLIC",
+    "FUTURE"
+  ],
+  "inside_witnesses": [
+    "IDENTITY",
+    "INTENT",
+    "INPUT",
+    "OUTPUT",
+    "MONEY",
+    "OPERATOR",
+    "MODEL",
+    "REVERSAL"
+  ]
+}

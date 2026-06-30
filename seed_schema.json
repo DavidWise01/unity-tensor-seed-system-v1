@@ -1,0 +1,13 @@
+{
+  "title": "UnityTensorSeed",
+  "type": "object",
+  "required": [
+    "seed_id",
+    "author",
+    "parent_hash",
+    "payload_hash",
+    "witness_hash",
+    "tripwire",
+    "witnesses"
+  ]
+}
