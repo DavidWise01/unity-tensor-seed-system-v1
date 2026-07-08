@@ -1,0 +1,9 @@
+ROOT0-DLW-CHAIN-v1
+index : 257
+slug  : unity-tensor-seed-system-v1
+seal  : f5b037fffcfae2e70eabe79aa8d6275e66f454786f5b2606417eb770c8690ab4
+prev  : 7d5a211f5c17d0226918a5d3a636e2bfc16c5df94fad551c89c848358273c809
+link  : b3ceb424e039154908b952d834dbdf87da6091053a474da34c4de3ecce91f50f
+head  : 3447d3a0533aaf1e29a8bdc67a9774884fb3ae9dbc8a17064b7a008ca3c4ec90
+
+— the tether: link = sha256(index|slug|seal|prev). the chain head commits to the whole corpus.
